@@ -5,23 +5,27 @@
 
 #define CONST_FILE_NAME "Data Tugas Pemrograman A.csv"
 
-#define MAX_DATA 1000
-#define DEGREE 2  // You can change this to 3 for cubic, etc.
+#define MAX_DATA 100
+#define DEGREE 3  // You can change this to 3 for cubic, etc.
 
-void polynomial_fit(int n, int degree, const int x[], double y[], double coeffs[]) {
-    double X[2 * DEGREE + 1] = {0}; // Sum of powers of x
+void polynomial_fit(int n, int degree, const int x[], const double y[], double coeffs[]) {
+    double X[2 * degree + 1];  // menyimpan jumlah pangkat x
     for (int i = 0; i < 2 * degree + 1; i++) {
-        for (int j = 0; j < n; j++)
+        X[i] = 0;
+        for (int j = 0; j < n; j++) {
             X[i] += pow(x[j], i);
+        }
     }
 
-    double B[DEGREE + 1] = {0};   
+    double B[degree + 1];  // sisi kanan
     for (int i = 0; i < degree + 1; i++) {
-        for (int j = 0; j < n; j++)
+        B[i] = 0;
+        for (int j = 0; j < n; j++) {
             B[i] += y[j] * pow(x[j], i);
+        }
     }
 
-    double matrix[DEGREE + 1][DEGREE + 2]; 
+    double matrix[degree + 1][degree + 2];  // matriks augmented
     for (int i = 0; i <= degree; i++) {
         for (int j = 0; j <= degree; j++) {
             matrix[i][j] = X[i + j];
@@ -29,14 +33,17 @@ void polynomial_fit(int n, int degree, const int x[], double y[], double coeffs[
         matrix[i][degree + 1] = B[i];
     }
 
+    // Eliminasi Gauss
     for (int i = 0; i <= degree; i++) {
         for (int k = i + 1; k <= degree; k++) {
-            double t = matrix[k][i] / matrix[i][i];
+            double factor = matrix[k][i] / matrix[i][i];
             for (int j = 0; j <= degree + 1; j++) {
-                matrix[k][j] -= t * matrix[i][j];
+                matrix[k][j] -= factor * matrix[i][j];
             }
         }
     }
+
+    // Substitusi mundur
     for (int i = degree; i >= 0; i--) {
         coeffs[i] = matrix[i][degree + 1];
         for (int j = i + 1; j <= degree; j++) {
@@ -46,6 +53,7 @@ void polynomial_fit(int n, int degree, const int x[], double y[], double coeffs[
     }
 }
 
+
 int main(void){
     FILE *file = fopen(CONST_FILE_NAME, "r");
     if (file == NULL) {
@@ -54,9 +62,9 @@ int main(void){
     }
 
     char buffer[1024];
-    int year[1000] = {0};
-    double percentage[1000] = {0};
-    long population[1000] = {0};
+    int year[100] = {0};
+    double percentage[100] = {0};
+    long population[100] = {0};
     int i = 0;
 
     char *token;
@@ -91,11 +99,19 @@ int main(void){
 
     fclose(file);
 
+    // for(int j = 0; j < i; j++) {
+    //     printf("%.2f\n", percentage[j]);
+    // }
+
     double coeffs_percentage[DEGREE + 1] = {0};
     double coeffs_population[DEGREE + 1] = {0};
 
     polynomial_fit(i, DEGREE, year, percentage, coeffs_percentage);
-    polynomial_fit(i, DEGREE, year, (double *)population, coeffs_population); // Cast needed
+    double population_double[100];
+    for (int j = 0; j < i; j++) {
+        population_double[j] = (double)population[j];
+    }
+    polynomial_fit(i, DEGREE, year, population_double, coeffs_population);
 
     printf("Persamaan a (Persentase Pengguna Internet): y = ");
     for (int d = DEGREE; d >= 0; d--) {
@@ -107,6 +123,21 @@ int main(void){
     for (int d = DEGREE; d >= 0; d--) {
         printf("%+.6f*x^%d ", coeffs_population[d], d);
     }
+
+    
+    printf("\nEnter year to predict: ");
+    fflush(stdout);
+    int year_to_predict;
+    scanf("%d", &year_to_predict);
+    double predicted_percentage = 0;
+    double predicted_population = 0;
+    for (int d = DEGREE; d >= 0; d--) {
+        predicted_percentage += coeffs_percentage[d] * pow(year_to_predict, d);
+        predicted_population += coeffs_population[d] * pow(year_to_predict, d);
+    }
+    printf("Predicted percentage for year %d: %.6f\n", year_to_predict, predicted_percentage);
+    printf("Predicted population for year %d: %.6f\n", year_to_predict, predicted_population);
+
     printf("\n");
     return 0; 
 }
