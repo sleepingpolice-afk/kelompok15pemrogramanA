@@ -81,7 +81,7 @@ void polynomial_fit(int n, int degree, const int x[], const double y[], double c
 
 
 int main(){
-    int degree = 4;
+    int degree = 3;
     FILE *file = fopen("Data Tugas Pemrograman A.csv", "r");
 
     char buffer[1024];
@@ -140,17 +140,17 @@ int main(){
     for (j = 0; j < i; j++) {
         population_double[j] = (double)population[j];
     }
-    polynomial_fit(i, degree, year, population_double, coeffs_population);
+    polynomial_fit(i, 1, year, population_double, coeffs_population); // degree 1 karena lurus
 
     printf("Persamaan a (Persentase Pengguna Internet): y = ");
     for (int d = degree; d >= 0; d--) {
-        printf("%.6f*x^%d ", coeffs_percentage[d], d);
+        printf("%+.6f*x^%d ", coeffs_percentage[d], d);
     }
     printf("\n");
 
     printf("Persamaan b (Pertumbuhan Populasi): y = ");
-    for (int d = degree; d >= 0; d--) {
-        printf("%.6f*x^%d ", coeffs_population[d], d);
+    for (int d = 1; d >= 0; d--) {
+        printf("%+.6f*x^%d ", coeffs_population[d], d);
     }
 
     plot_data(year, percentage, i, coeffs_percentage, "Persentase Pengguna Internet", degree);
@@ -165,7 +165,13 @@ int main(){
         predicted_percentage += coeffs_percentage[d] * pow(year_to_predict, d);
         predicted_population += coeffs_population[d] * pow(year_to_predict, d);
     }
-    printf("Predicted percentage for year %d: %.6f\n", year_to_predict, predicted_percentage);
+
+    if (predicted_percentage >= 100)
+    {
+        predicted_percentage = 100;
+    }
+
+    printf("Predicted percentage internet user for year %d: %.6f\n", year_to_predict, predicted_percentage);
     printf("Predicted population for year %d: %.6f\n", year_to_predict, predicted_population);
 
     printf("\n");
