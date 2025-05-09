@@ -8,6 +8,37 @@
 #define MAX_DATA 100
 #define DEGREE 6  // You can change this to 3 for cubic, etc.
 
+void plot_data_and_fit(const int x[], const double y[], int n, double coeffs[], const char *title) {
+    FILE *data = fopen("plot_data.dat", "w");
+    FILE *fit = fopen("fit_data.dat", "w");
+
+    for (int i = 0; i < n; i++) {
+        fprintf(data, "%d %f\n", x[i], y[i]);
+    }
+
+    // Write smooth line from min to max year
+    int x_start = x[0], x_end = x[n - 1];
+    for (int xi = x_start; xi <= x_end; xi++) {
+        double y_fit = 0;
+        for (int d = 0; d <= DEGREE; d++) {
+            y_fit += coeffs[d] * pow(xi, d);
+        }
+        fprintf(fit, "%d %f\n", xi, y_fit);
+    }
+
+    fclose(data);
+    fclose(fit);
+
+    FILE *gnuplot = popen("gnuplot -persistent", "w");
+    fprintf(gnuplot, "set title '%s'\n", title);
+    fprintf(gnuplot, "set xlabel 'Year'\n");
+    fprintf(gnuplot, "set ylabel 'Value'\n");
+    fprintf(gnuplot, "plot 'plot_data.dat' using 1:2 with points title 'Data', "
+                     "'fit_data.dat' using 1:2 with lines title 'Polynomial Fit'\n");
+    pclose(gnuplot);
+}
+
+
 void polynomial_fit(int n, int degree, const int x[], const double y[], double coeffs[]) {
     double X[2 * degree + 1];  // menyimpan jumlah pangkat x
     for (int i = 0; i < 2 * degree + 1; i++) {
@@ -137,6 +168,10 @@ int main(void){
     }
     printf("Predicted percentage for year %d: %.6f\n", year_to_predict, predicted_percentage);
     printf("Predicted population for year %d: %.6f\n", year_to_predict, predicted_population);
+
+    plot_data_and_fit(year, percentage, i, coeffs_percentage, "Persentase Pengguna Internet");
+    plot_data_and_fit(year, population_double, i, coeffs_population, "Pertumbuhan Populasi");
+
 
     printf("\n");
     return 0; 
