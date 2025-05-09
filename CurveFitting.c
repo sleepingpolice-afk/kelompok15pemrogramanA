@@ -6,7 +6,7 @@
 #define CONST_FILE_NAME "Data Tugas Pemrograman A.csv"
 
 #define MAX_DATA 100
-#define DEGREE 3  // You can change this to 3 for cubic, etc.
+#define DEGREE 6  // You can change this to 3 for cubic, etc.
 
 void polynomial_fit(int n, int degree, const int x[], const double y[], double coeffs[]) {
     double X[2 * degree + 1];  // menyimpan jumlah pangkat x
@@ -141,3 +141,4 @@ int main(void){
     printf("\n");
     return 0; 
 }
+
