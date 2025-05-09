@@ -3,12 +3,8 @@
 #include <string.h>
 #include <math.h>
 
-#define CONST_FILE_NAME "Data Tugas Pemrograman A.csv"
 
-#define MAX_DATA 100
-#define DEGREE 6  // You can change this to 3 for cubic, etc.
-
-void plot_data_and_fit(const int x[], const double y[], int n, double coeffs[], const char *title) {
+void plot_data(const int x[], const double y[], int n, double coeffs[], const char *title, int degree) {
     FILE *data = fopen("plot_data.dat", "w");
     FILE *fit = fopen("fit_data.dat", "w");
 
@@ -16,11 +12,10 @@ void plot_data_and_fit(const int x[], const double y[], int n, double coeffs[], 
         fprintf(data, "%d %f\n", x[i], y[i]);
     }
 
-    // Write smooth line from min to max year
     int x_start = x[0], x_end = x[n - 1];
     for (int xi = x_start; xi <= x_end; xi++) {
         double y_fit = 0;
-        for (int d = 0; d <= DEGREE; d++) {
+        for (int d = 0; d <= degree; d++) {
             y_fit += coeffs[d] * pow(xi, d);
         }
         fprintf(fit, "%d %f\n", xi, y_fit);
@@ -85,18 +80,15 @@ void polynomial_fit(int n, int degree, const int x[], const double y[], double c
 }
 
 
-int main(void){
-    FILE *file = fopen(CONST_FILE_NAME, "r");
-    if (file == NULL) {
-        fprintf(stderr, "Error opening file %s\n", CONST_FILE_NAME);
-        return 1;
-    }
+int main(){
+    int degree = 4;
+    FILE *file = fopen("Data Tugas Pemrograman A.csv", "r");
 
     char buffer[1024];
     int year[100] = {0};
     double percentage[100] = {0};
     long population[100] = {0};
-    int i = 0;
+    int i = 0, d = 0, j = 0;
 
     char *token;
 
@@ -134,44 +126,47 @@ int main(void){
     //     printf("%.2f\n", percentage[j]);
     // }
 
-    double coeffs_percentage[DEGREE + 1] = {0};
-    double coeffs_population[DEGREE + 1] = {0};
+    double coeffs_percentage[degree + 1];
+    for (d = 0; d <= degree; d++) {
+        coeffs_percentage[d] = 0.0;
+    }
+    double coeffs_population[degree + 1];
+    for(d = 0; d <= degree; d++) {
+        coeffs_population[d] = 0.0;
+    }
 
-    polynomial_fit(i, DEGREE, year, percentage, coeffs_percentage);
+    polynomial_fit(i, degree, year, percentage, coeffs_percentage);
     double population_double[100];
-    for (int j = 0; j < i; j++) {
+    for (j = 0; j < i; j++) {
         population_double[j] = (double)population[j];
     }
-    polynomial_fit(i, DEGREE, year, population_double, coeffs_population);
+    polynomial_fit(i, degree, year, population_double, coeffs_population);
 
     printf("Persamaan a (Persentase Pengguna Internet): y = ");
-    for (int d = DEGREE; d >= 0; d--) {
-        printf("%+.6f*x^%d ", coeffs_percentage[d], d);
+    for (int d = degree; d >= 0; d--) {
+        printf("%.6f*x^%d ", coeffs_percentage[d], d);
     }
     printf("\n");
 
     printf("Persamaan b (Pertumbuhan Populasi): y = ");
-    for (int d = DEGREE; d >= 0; d--) {
-        printf("%+.6f*x^%d ", coeffs_population[d], d);
+    for (int d = degree; d >= 0; d--) {
+        printf("%.6f*x^%d ", coeffs_population[d], d);
     }
 
+    plot_data(year, percentage, i, coeffs_percentage, "Persentase Pengguna Internet", degree);
+    plot_data(year, population_double, i, coeffs_population, "Pertumbuhan Populasi", degree);
     
     printf("\nEnter year to predict: ");
-    fflush(stdout);
     int year_to_predict;
     scanf("%d", &year_to_predict);
     double predicted_percentage = 0;
     double predicted_population = 0;
-    for (int d = DEGREE; d >= 0; d--) {
+    for (int d = degree; d >= 0; d--) {
         predicted_percentage += coeffs_percentage[d] * pow(year_to_predict, d);
         predicted_population += coeffs_population[d] * pow(year_to_predict, d);
     }
     printf("Predicted percentage for year %d: %.6f\n", year_to_predict, predicted_percentage);
     printf("Predicted population for year %d: %.6f\n", year_to_predict, predicted_population);
-
-    plot_data_and_fit(year, percentage, i, coeffs_percentage, "Persentase Pengguna Internet");
-    plot_data_and_fit(year, population_double, i, coeffs_population, "Pertumbuhan Populasi");
-
 
     printf("\n");
     return 0; 

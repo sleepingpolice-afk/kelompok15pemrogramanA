@@ -61,11 +61,6 @@ def main():
     file_path = "Data Tugas Pemrograman A.csv"
     years, percentages, populations = parse_data(file_path)
     
-    if len(years) == 0:
-        years = np.array([1960, 1970, 1980, 1990, 2000, 2010, 2020])
-        percentages = np.array([0, 0, 0, 0.001, 0.926, 10.92, 53.73])
-        populations = np.array([88296070, 115657495, 148950540, 183501098, 216077790, 246305322, 274814866])
-    
     degree_percentage = 3
     degree_population = 3
     
