@@ -28,8 +28,7 @@ void plot_data(const int x[], const double y[], int n, double coeffs[], const ch
     fprintf(gnuplot, "set title '%s'\n", title);
     fprintf(gnuplot, "set xlabel 'Year'\n");
     fprintf(gnuplot, "set ylabel 'Value'\n");
-    fprintf(gnuplot, "plot 'plot_data.dat' using 1:2 with points title 'Data', "
-                     "'fit_data.dat' using 1:2 with lines title 'Polynomial Fit'\n");
+    fprintf(gnuplot, "plot 'plot_data.dat' using 1:2 with points title 'Data', ""'fit_data.dat' using 1:2 with lines title 'Polynomial Fit'\n");
     pclose(gnuplot);
 }
 
